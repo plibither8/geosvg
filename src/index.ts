@@ -263,7 +263,7 @@ export function fromCoordinates(points: Coordinates[]) {
   return outputs(points);
 }
 
-const inputs: Record<string, (...args: any[]) => ReturnType<typeof outputs>> = {
+const inputs = {
   fromGpx,
   fromCoordinates,
 };
