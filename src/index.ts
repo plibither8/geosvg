@@ -39,14 +39,14 @@ type Line = [Coordinates, Coordinates];
 
 export interface CartesianOptions {
   accuracy?: number;
-  scaledTo?: number;
+  scale?: number;
 }
 
 export interface SvgOptions {
   smooth?: boolean;
   smoothing?: number;
   accuracy?: number;
-  scaledTo?: number;
+  scale?: number;
   svg?: Partial<{
     width: number;
     height: number;
@@ -66,7 +66,7 @@ const defaultOptions: RequiredOptions = {
   smooth: true,
   smoothing: 0.2,
   accuracy: 0.001,
-  scaledTo: undefined,
+  scale: undefined,
   svg: {
     width: undefined,
     height: undefined,
@@ -162,11 +162,11 @@ export function generateCartesianDetails(
   const yAxis: Line = [corners.nw, corners.sw];
   const absoluteWidth = getDistance(...xAxis, options.accuracy);
   const absoluteHeight = getDistance(...yAxis, options.accuracy);
-  options.scaledTo ??= Math.max(absoluteWidth, absoluteHeight);
+  options.scale ??= Math.max(absoluteWidth, absoluteHeight);
   const [width, height] =
     absoluteWidth > absoluteHeight
-      ? [options.scaledTo, (options.scaledTo * absoluteHeight) / absoluteWidth]
-      : [(options.scaledTo * absoluteWidth) / absoluteHeight, options.scaledTo];
+      ? [options.scale, (options.scale * absoluteHeight) / absoluteWidth]
+      : [(options.scale * absoluteWidth) / absoluteHeight, options.scale];
   const multiplier = width / absoluteWidth;
   const cartesianPoints = points.map((point) => ({
     x: getDistanceFromLine(point, ...yAxis, options.accuracy) * multiplier,
