@@ -47,7 +47,11 @@ export interface Coordinates {
 
 type Line = [Coordinates, Coordinates];
 
-export interface GenerateOptions {
+export interface CartesianOptions {
+  accuracy?: number;
+}
+
+export interface SvgOptions {
   smooth?: boolean;
   smoothing?: number;
   accuracy?: number;
@@ -64,7 +68,7 @@ export interface GenerateOptions {
 }
 
 type RequiredOptions = Required<
-  Omit<GenerateOptions, "svg"> & { svg: Required<GenerateOptions["svg"]> }
+  Omit<SvgOptions, "svg"> & { svg: Required<SvgOptions["svg"]> }
 >;
 
 const defaultOptions: RequiredOptions = {
@@ -83,7 +87,7 @@ const defaultOptions: RequiredOptions = {
   },
 };
 
-const getOptions = (supplied: GenerateOptions): RequiredOptions => ({
+const getOptions = (supplied: SvgOptions): RequiredOptions => ({
   ...defaultOptions,
   ...supplied,
   svg: {
@@ -205,7 +209,7 @@ const getCartesianPoint = (
 
 export function generateCartesianPoints(
   points: Coordinates[],
-  options?: GenerateOptions
+  options?: CartesianOptions
 ) {
   options ??= defaultOptions;
   const { x: xAxis, y: yAxis } = getAxes(points);
@@ -217,7 +221,7 @@ export function generateCartesianPoints(
 
 export function generateSvg(
   points: Coordinates[],
-  options?: GenerateOptions
+  options?: SvgOptions
 ): string {
   options ??= defaultOptions;
   const { x: xAxis, y: yAxis } = getAxes(points);
@@ -234,7 +238,7 @@ export function generateSvg(
 
 export function generateSvgPath(
   points: Coordinates[],
-  options?: GenerateOptions
+  options?: SvgOptions
 ): string {
   options ??= defaultOptions;
   const cartesianPoints = generateCartesianPoints(points, options);
@@ -266,12 +270,11 @@ const inputs: Record<string, (...args: any[]) => ReturnType<typeof outputs>> = {
 
 const outputs = (
   points: Coordinates[]
-): Record<string, (options: GenerateOptions) => any> => ({
-  toSvg: (options?: GenerateOptions) =>
-    generateSvg(points, getOptions(options)),
-  toSvgPath: (options?: GenerateOptions) =>
+): Record<string, (options: SvgOptions) => any> => ({
+  toSvg: (options?: SvgOptions) => generateSvg(points, getOptions(options)),
+  toSvgPath: (options?: SvgOptions) =>
     generateSvgPath(points, getOptions(options)),
-  toCartesianPoints: (options?: GenerateOptions) =>
+  toCartesianPoints: (options?: CartesianOptions) =>
     generateCartesianPoints(points, getOptions(options)),
 });
 

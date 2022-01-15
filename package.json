@@ -1,5 +1,32 @@
 {
-  "private": true,
+  "name": "geosvg",
+  "version": "1.0.0",
+  "description": "🗺 Generate SVGs or Cartesian coordinates of a path from a GPX file or list of coordinates",
+  "author": {
+    "name": "Mihir Chaturvedi",
+    "email": "plibither8@gmail.com",
+    "url": "https://mihir.ch"
+  },
+  "license": "MIT",
+  "funding": "https://mihir.ch/thanks",
+  "homepage": "https://github.com/plibither8/geosvg#readme",
+  "repository": "plibither8/geosvg",
+  "bugs": {
+    "url": "https://github.com/plibither8/geosvg/issues",
+    "email": "plibither8@gmail.com"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist/index.*"
+  ],
+  "keywords": [
+    "svg",
+    "cartesian",
+    "gpx",
+    "coordinates"
+  ],
   "scripts": {
     "dev": "nodemon",
     "build": "tsc && tsconfig-replace-paths --project tsconfig.json",

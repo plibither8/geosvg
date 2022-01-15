@@ -1,21 +1,74 @@
-# Simple TypeScript Starter
+# geosvg
 
-> Bare minimum TypeScript project template to get started quickly.
+> 🗺 Generate SVGs or Cartesian points of a path from a GPX file or list of coordinates
 
-A bare minimum, no-frills TypeScript starter template with development/production scripts and linting included.
+Get an SVG string, the svg's `path` string or list of Cartesian coordinates mapped to the path supplied by a GPX file or an array of geographical coordinates (lat/long).
 
-- Nodemon + `ts-node` for development
-- `tsc` for building production distribution
+## Install
 
-Entry file: `src/main.ts`.
+```sh
+$ npm install geosvg
+```
 
-## Get Started
+## Usage
 
-1. Create a repo from this template and locally clone it. Or... run `npx degit plibither8/typescript` to get it directly onto your machine.
-2. `npm install` or `pnpm install` or `yarn`, as per your taste
-3. `npm run dev` for running in development mode (watches files)
-4. `npm run build` for building production files
-5. `npm run start` for running production-built files
+```ts
+import geosvg from "geosvg";
+
+// Read the GPX string from a file first
+const gpx = readFileSync(PATH_TO_GPX, "utf-8");
+// ...or directly create a list of coordinates
+const coordinates = [
+  { latitude: 28.1234, longitude: 77.4567 },
+  { latitude: 28.1235, longitude: 77.4568 },
+  { latitude: 28.1236, longitude: 77.4569 },
+];
+
+// Get the SVG string
+const svg = geosvg.fromGpx(gpx).toSvg();
+const svg = geosvg.fromCoordinates(gpx).toSvg();
+//=> `<svg xmlns="..." width="..." height="..." viewBox="..."><path d="..." /></svg>`
+
+// Get the SVG path string
+const svgPath = geosvg.fromGpx(gpx).toSvgPath();
+const svgPath = geosvg.fromCoordinates(gpx).toSvgPath();
+//=> `M 296.072357,57.331839 C 295.681288,57.932999 294.762101...`
+
+// Get the cartesian points
+const points = geosvg.fromGpx(gpx).toCartesianPoints();
+const points = geosvg.fromCoordinates(gpx).toCartesianPoints();
+//=> [{ x: 300, y: 700 }, { x: 301, y: 700.25 }, ...]
+```
+
+### Options
+
+#### `.toSvg(options?)`, `.toSvgPath(options?)`
+
+```ts
+{
+  smooth?: boolean = true; // whether to smoothen the lines or not
+  smoothing?: number = 0.2; // smoothening factor
+  accuracy?: number = 0.001; // accuracy of distance measurements
+  maxDimension?: number = undefined; // max-dimensions to scale the svg too
+  svg?: Partial<{
+    width: number = undefined; // width of the svg, ideally leave it undefined
+    height: number = undefined; // height of the svg, ideally leave it undefined
+    stroke: string = "red"; // stroke color of the svg
+    strokeWidth: number = 4; // stroke with of the svg
+    strokeLinecap: string = "round"; // stroke's line-cap style
+    strokeMiterlimit: number = 4; // stroke's Miter limit
+    fill: string = "none"; // whether to fill in the path with a color
+  }>;
+}
+```
+
+#### `.toCartesianPoints(options?)`
+
+```ts
+{
+  accuracy?: number = 0.001; // accuracy of distance measurements
+}
+```
 
 ## License
 
