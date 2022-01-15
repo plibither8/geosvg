@@ -1,6 +1,6 @@
 {
   "name": "geosvg",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "🗺 Generate SVGs or Cartesian coordinates of a path from a GPX file or list of coordinates",
   "author": {
     "name": "Mihir Chaturvedi",
