@@ -26,17 +26,17 @@ const coordinates = [
 
 // Get the SVG string
 const svg = geosvg.fromGpx(gpx).toSvg();
-const svg = geosvg.fromCoordinates(gpx).toSvg();
+const svg = geosvg.fromCoordinates(coordinates).toSvg();
 //=> `<svg xmlns="..." width="..." height="..." viewBox="..."><path d="..." /></svg>`
 
 // Get the SVG path string
 const svgPath = geosvg.fromGpx(gpx).toSvgPath();
-const svgPath = geosvg.fromCoordinates(gpx).toSvgPath();
+const svgPath = geosvg.fromCoordinates(coordinates).toSvgPath();
 //=> `M 296.072357,57.331839 C 295.681288,57.932999 294.762101...`
 
 // Get the cartesian points
 const points = geosvg.fromGpx(gpx).toCartesianPoints();
-const points = geosvg.fromCoordinates(gpx).toCartesianPoints();
+const points = geosvg.fromCoordinates(coordinates).toCartesianPoints();
 //=> [{ x: 300, y: 700 }, { x: 301, y: 700.25 }, ...]
 ```
 
@@ -50,15 +50,15 @@ const points = geosvg.fromCoordinates(gpx).toCartesianPoints();
   smoothing?: number = 0.2; // smoothening factor
   accuracy?: number = 0.001; // accuracy of distance measurements
   maxDimension?: number = undefined; // max-dimensions to scale the svg too
-  svg?: Partial<{
-    width: number = undefined; // width of the svg, ideally leave it undefined
-    height: number = undefined; // height of the svg, ideally leave it undefined
-    stroke: string = "red"; // stroke color of the svg
-    strokeWidth: number = 4; // stroke with of the svg
-    strokeLinecap: string = "round"; // stroke's line-cap style
-    strokeMiterlimit: number = 4; // stroke's Miter limit
-    fill: string = "none"; // whether to fill in the path with a color
-  }>;
+  svg?: {
+    width?: number = undefined; // width of the svg, ideally leave it undefined
+    height?: number = undefined; // height of the svg, ideally leave it undefined
+    stroke?: string = "red"; // stroke color of the svg
+    strokeWidth?: number = 4; // stroke with of the svg
+    strokeLinecap?: string = "round"; // stroke's line-cap style
+    strokeMiterlimit?: number = 4; // stroke's Miter limit
+    fill?: string = "none"; // whether to fill in the path with a color
+  };
 }
 ```
 
