@@ -32,12 +32,12 @@ const svg = geosvg.fromCoordinates(coordinates).toSvg();
 // Get the SVG path string
 const svgPath = geosvg.fromGpx(gpx).toSvgPath();
 const svgPath = geosvg.fromCoordinates(coordinates).toSvgPath();
-//=> `M 296.072357,57.331839 C 295.681288,57.932999 294.762101...`
+//=> { width: 1000, height: 1200, path: `M 296.072357,57.331839 C 295.681288,57.932999 294.762101...` }
 
 // Get the cartesian points
-const points = geosvg.fromGpx(gpx).toCartesianPoints();
-const points = geosvg.fromCoordinates(coordinates).toCartesianPoints();
-//=> [{ x: 300, y: 700 }, { x: 301, y: 700.25 }, ...]
+const points = geosvg.fromGpx(gpx).toCartesianDetails();
+const points = geosvg.fromCoordinates(coordinates).toCartesianDetails();
+//=> { width: 1000, height: 1200, points: [{ x: 300, y: 700 }, { x: 301, y: 700.25 }, ...] }
 ```
 
 ### Options
@@ -62,7 +62,7 @@ const points = geosvg.fromCoordinates(coordinates).toCartesianPoints();
 }
 ```
 
-#### `.toCartesianPoints(options?)`
+#### `.toCartesianDetails(options?)`
 
 ```ts
 {
