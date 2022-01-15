@@ -50,6 +50,6 @@
   },
   "dependencies": {
     "geolib": "^3.3.3",
-    "xml-js": "^1.6.11"
+    "xml2json-light": "^1.0.6"
   }
 }

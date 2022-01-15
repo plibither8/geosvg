@@ -1,5 +1,5 @@
 import { getBounds, getDistance, getDistanceFromLine } from "geolib";
-import { xml2js } from "xml-js";
+import { xml2json } from "xml2json-light";
 
 interface XmlValue {
   _text: string;
@@ -12,24 +12,14 @@ interface Bounds {
   minLng: number;
 }
 
-export interface GpxTrackPoint {
-  _attributes: {
-    lat: string;
-    lon: string;
-  };
-  ele?: XmlValue;
-  time?: XmlValue;
-  extensions?: Record<string, any>;
-}
-
 export interface Gpx {
   gpx: {
-    metadata: { time: XmlValue };
     trk: {
-      name: XmlValue;
-      type: XmlValue;
       trkseg: {
-        trkpt: GpxTrackPoint[];
+        trkpt: {
+          lat: string;
+          lon: string;
+        }[];
       };
     };
   };
@@ -246,14 +236,11 @@ export function generateSvgPath(
 }
 
 export function fromGpx(gpx: string) {
-  const parsedGpx = xml2js(gpx, {
-    compact: true,
-    ignoreDeclaration: true,
-  }) as Gpx;
+  const parsedGpx = xml2json(gpx) as Gpx;
   const points: Coordinates[] = parsedGpx.gpx.trk.trkseg.trkpt.map(
-    ({ _attributes }) => ({
-      latitude: Number(_attributes.lat),
-      longitude: Number(_attributes.lon),
+    ({ lat, lon }) => ({
+      latitude: Number(lat),
+      longitude: Number(lon),
     })
   );
   return outputs(points);

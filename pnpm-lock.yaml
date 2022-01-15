@@ -14,11 +14,11 @@ specifiers:
   tsconfig-paths: ^3.12.0
   tsconfig-replace-paths: ^0.0.11
   typescript: ^4.5.4
-  xml-js: ^1.6.11
+  xml2json-light: ^1.0.6
 
 dependencies:
   geolib: 3.3.3
-  xml-js: 1.6.11
+  xml2json-light: 1.0.6
 
 devDependencies:
   '@types/node': 17.0.8
@@ -1314,10 +1314,6 @@ packages:
       queue-microtask: 1.2.3
     dev: true
 
-  /sax/1.2.4:
-    resolution: {integrity: sha512-NqVDv9TpANUjFm0N8uM5GxL36UgKi9/atZw+x7YFnQ8ckwFGKrl4xX4yWtrey3UJm5nP1kUbnYgLopqWNSRhWw==}
-    dev: false
-
   /semver-diff/3.1.1:
     resolution: {integrity: sha512-GX0Ix/CJcHyB8c4ykpHGIAvLyOwOobtM/8d+TQkAd81/bEjgPHrfba41Vpesr7jX/t8Uh+R3EX9eAS5be+jQYg==}
     engines: {node: '>=8'}
@@ -1603,11 +1599,8 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
-  /xml-js/1.6.11:
-    resolution: {integrity: sha512-7rVi2KMfwfWFl+GpPg6m80IVMWXLRjO+PxTq7V2CDhoGak0wzYzFgUY2m4XJ47OGdXd8eLE8EmwfAmdjw7lC1g==}
-    hasBin: true
-    dependencies:
-      sax: 1.2.4
+  /xml2json-light/1.0.6:
+    resolution: {integrity: sha1-ERaHcQorAfvS/hj0GK31Ed5UfzQ=}
     dev: false
 
   /yallist/4.0.0:
