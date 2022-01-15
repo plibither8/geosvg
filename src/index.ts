@@ -12,11 +12,6 @@ interface Bounds {
   minLng: number;
 }
 
-interface CartesianPoint {
-  x: number;
-  y: number;
-}
-
 export interface GpxTrackPoint {
   _attributes: {
     lat: string;
@@ -40,6 +35,11 @@ export interface Gpx {
   };
 }
 
+export interface CartesianPoint {
+  x: number;
+  y: number;
+}
+
 export interface Coordinates {
   latitude: number;
   longitude: number;
@@ -47,10 +47,11 @@ export interface Coordinates {
 
 type Line = [Coordinates, Coordinates];
 
-export interface GenerateSvgOptions {
+export interface GenerateOptions {
   smooth?: boolean;
   smoothing?: number;
   accuracy?: number;
+  maxDimension?: number;
   svg?: Partial<{
     width: number;
     height: number;
@@ -62,11 +63,18 @@ export interface GenerateSvgOptions {
   }>;
 }
 
-const defaultOptions: Required<GenerateSvgOptions> = {
+type RequiredOptions = Required<
+  Omit<GenerateOptions, "svg"> & { svg: Required<GenerateOptions["svg"]> }
+>;
+
+const defaultOptions: RequiredOptions = {
   smooth: true,
   smoothing: 0.2,
   accuracy: 0.001,
+  maxDimension: undefined,
   svg: {
+    width: undefined,
+    height: undefined,
     stroke: "red",
     strokeWidth: 4,
     strokeLinecap: "round",
@@ -75,11 +83,13 @@ const defaultOptions: Required<GenerateSvgOptions> = {
   },
 };
 
-const getOptions = (
-  supplied: GenerateSvgOptions
-): Required<GenerateSvgOptions> => ({
+const getOptions = (supplied: GenerateOptions): RequiredOptions => ({
   ...defaultOptions,
   ...supplied,
+  svg: {
+    ...defaultOptions.svg,
+    ...supplied?.svg,
+  },
 });
 
 const getSvgPath = (
@@ -120,7 +130,6 @@ const getSvgPath = (
     return `C ${cpsX},${cpsY} ${cpeX},${cpeY} ${point.x},${point.y}`;
   };
   const straight = (point: CartesianPoint) => `L ${point.x},${point.y}`;
-
   return points.reduce(
     (acc, point, index) =>
       index === 0
@@ -134,31 +143,32 @@ const getSvg = (
   width: number,
   height: number,
   path: string,
-  options?: GenerateSvgOptions["svg"]
+  options: RequiredOptions["svg"]
 ): string =>
   `<svg
       xmlns="http://www.w3.org/2000/svg"
-      width="${options?.width ?? width}"
-      height="${options?.height ?? height}"
-      viewBox="0 0 ${options?.width ?? width} ${options?.height ?? height}"
+      width="${width}"
+      height="${height}"
+      viewBox="0 0 ${width} ${height}"
     >
       <path
         d="${path}"
-        fill="${options?.fill ?? "none"}"
-        stroke="${options?.stroke ?? "red"}"
-        stroke-width="${options?.strokeWidth ?? "4"}"
-        stroke-linecap="${options?.strokeLinecap ?? "round"}"
-        stroke-miterlimit="${options?.strokeMiterlimit ?? "4"}"
+        fill="${options.fill}"
+        stroke="${options.stroke}"
+        stroke-width="${options.strokeWidth}"
+        stroke-linecap="${options.strokeLinecap}"
+        stroke-miterlimit="${options.strokeMiterlimit}"
       />
     </svg>`.trim();
 
 const getAxes = (
-  points: Coordinates[]
+  points: Coordinates[],
+  bounds?: Bounds
 ): {
   x: Line;
   y: Line;
 } => {
-  const bounds = getBounds(points) as Bounds;
+  bounds ??= getBounds(points) as Bounds;
   const corners: Record<string, Coordinates> = {
     nw: {
       latitude: bounds.maxLat,
@@ -193,6 +203,44 @@ const getCartesianPoint = (
   y: getDistanceFromLine(point, ...xAxis, accuracy),
 });
 
+export function generateCartesianPoints(
+  points: Coordinates[],
+  options?: GenerateOptions
+) {
+  options ??= defaultOptions;
+  const { x: xAxis, y: yAxis } = getAxes(points);
+  const cartesianPoints = points.map((point) =>
+    getCartesianPoint(point, xAxis, yAxis, options.accuracy)
+  );
+  return cartesianPoints;
+}
+
+export function generateSvg(
+  points: Coordinates[],
+  options?: GenerateOptions
+): string {
+  options ??= defaultOptions;
+  const { x: xAxis, y: yAxis } = getAxes(points);
+  const width = getDistance(...xAxis, options.accuracy);
+  const height = getDistance(...yAxis, options.accuracy);
+  const cartesianPoints = generateCartesianPoints(points, options);
+  return getSvg(
+    options.svg.width ?? width,
+    options.svg.height ?? height,
+    getSvgPath(cartesianPoints, options.smooth, options.smoothing),
+    (options as RequiredOptions).svg
+  );
+}
+
+export function generateSvgPath(
+  points: Coordinates[],
+  options?: GenerateOptions
+): string {
+  options ??= defaultOptions;
+  const cartesianPoints = generateCartesianPoints(points, options);
+  return getSvgPath(cartesianPoints, options.smooth, options.smoothing);
+}
+
 export function fromGpx(gpx: string) {
   const parsedGpx = xml2js(gpx, {
     compact: true,
@@ -207,45 +255,24 @@ export function fromGpx(gpx: string) {
   return outputs(points);
 }
 
-export function generateSvg(
-  points: Coordinates[],
-  options: GenerateSvgOptions
-): string {
-  const { x: xAxis, y: yAxis } = getAxes(points);
-  const width = getDistance(...xAxis, options.accuracy);
-  const height = getDistance(...yAxis, options.accuracy);
-  const cartesianPoints = points.map((point) =>
-    getCartesianPoint(point, xAxis, yAxis, options.accuracy)
-  );
-  return getSvg(
-    width,
-    height,
-    getSvgPath(cartesianPoints, options.smooth, options.smoothing),
-    options.svg
-  );
+export function fromCoordinates(points: Coordinates[]) {
+  return outputs(points);
 }
 
-export function generateSvgPath(
-  points: Coordinates[],
-  options: GenerateSvgOptions
-): string {
-  const { x: xAxis, y: yAxis } = getAxes(points);
-  const cartesianPoints = points.map((point) =>
-    getCartesianPoint(point, xAxis, yAxis, options.accuracy)
-  );
-  return getSvgPath(cartesianPoints, options.smooth, options.smoothing);
-}
-
-export const inputs = {
+const inputs: Record<string, (...args: any[]) => ReturnType<typeof outputs>> = {
   fromGpx,
-  fromCoordinates: (points: Coordinates[]) => outputs(points),
+  fromCoordinates,
 };
 
-const outputs = (points: Coordinates[]) => ({
-  toSvg: (options?: GenerateSvgOptions) =>
+const outputs = (
+  points: Coordinates[]
+): Record<string, (options: GenerateOptions) => any> => ({
+  toSvg: (options?: GenerateOptions) =>
     generateSvg(points, getOptions(options)),
-  toSvgPath: (options?: GenerateSvgOptions) =>
+  toSvgPath: (options?: GenerateOptions) =>
     generateSvgPath(points, getOptions(options)),
+  toCartesianPoints: (options?: GenerateOptions) =>
+    generateCartesianPoints(points, getOptions(options)),
 });
 
 export default inputs;
