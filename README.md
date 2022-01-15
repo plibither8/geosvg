@@ -49,7 +49,7 @@ const points = geosvg.fromCoordinates(coordinates).toCartesianDetails();
   smooth?: boolean = true; // whether to smoothen the lines or not
   smoothing?: number = 0.2; // smoothening factor
   accuracy?: number = 0.001; // accuracy of distance measurements
-  maxDimension?: number = undefined; // max-dimensions to scale the svg too
+  scaledTo?: number = undefined; // max-dimensions to scale the svg too
   svg?: {
     width?: number = undefined; // width of the svg, ideally leave it undefined
     height?: number = undefined; // height of the svg, ideally leave it undefined

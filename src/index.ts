@@ -39,13 +39,14 @@ type Line = [Coordinates, Coordinates];
 
 export interface CartesianOptions {
   accuracy?: number;
+  scaledTo?: number;
 }
 
 export interface SvgOptions {
   smooth?: boolean;
   smoothing?: number;
   accuracy?: number;
-  maxDimension?: number;
+  scaledTo?: number;
   svg?: Partial<{
     width: number;
     height: number;
@@ -65,7 +66,7 @@ const defaultOptions: RequiredOptions = {
   smooth: true,
   smoothing: 0.2,
   accuracy: 0.001,
-  maxDimension: undefined,
+  scaledTo: undefined,
   svg: {
     width: undefined,
     height: undefined,
@@ -133,36 +134,12 @@ const getSvgPath = (
   );
 };
 
-const getSvg = (
-  width: number,
-  height: number,
-  path: string,
-  options: RequiredOptions["svg"]
-): string =>
-  `<svg
-      xmlns="http://www.w3.org/2000/svg"
-      width="${width}"
-      height="${height}"
-      viewBox="0 0 ${width} ${height}"
-    >
-      <path
-        d="${path}"
-        fill="${options.fill}"
-        stroke="${options.stroke}"
-        stroke-width="${options.strokeWidth}"
-        stroke-linecap="${options.strokeLinecap}"
-        stroke-miterlimit="${options.strokeMiterlimit}"
-      />
-    </svg>`.trim();
-
-const getAxes = (
+export function generateCartesianDetails(
   points: Coordinates[],
-  bounds?: Bounds
-): {
-  x: Line;
-  y: Line;
-} => {
-  bounds ??= getBounds(points) as Bounds;
+  options?: CartesianOptions
+) {
+  options ??= defaultOptions;
+  const bounds = getBounds(points) as Bounds;
   const corners: Record<string, Coordinates> = {
     nw: {
       latitude: bounds.maxLat,
@@ -181,33 +158,20 @@ const getAxes = (
       longitude: bounds.minLng,
     },
   };
-  return {
-    x: [corners.nw, corners.ne],
-    y: [corners.nw, corners.sw],
-  };
-};
-
-const getCartesianPoint = (
-  point: Coordinates,
-  xAxis: Line,
-  yAxis: Line,
-  accuracy: number
-): CartesianPoint => ({
-  x: getDistanceFromLine(point, ...yAxis, accuracy),
-  y: getDistanceFromLine(point, ...xAxis, accuracy),
-});
-
-export function generateCartesianDetails(
-  points: Coordinates[],
-  options?: CartesianOptions
-) {
-  options ??= defaultOptions;
-  const { x: xAxis, y: yAxis } = getAxes(points);
-  const width = getDistance(...xAxis, options.accuracy);
-  const height = getDistance(...yAxis, options.accuracy);
-  const cartesianPoints = points.map((point) =>
-    getCartesianPoint(point, xAxis, yAxis, options.accuracy)
-  );
+  const xAxis: Line = [corners.nw, corners.ne];
+  const yAxis: Line = [corners.nw, corners.sw];
+  const absoluteWidth = getDistance(...xAxis, options.accuracy);
+  const absoluteHeight = getDistance(...yAxis, options.accuracy);
+  options.scaledTo ??= Math.max(absoluteWidth, absoluteHeight);
+  const [width, height] =
+    absoluteWidth > absoluteHeight
+      ? [options.scaledTo, (options.scaledTo * absoluteHeight) / absoluteWidth]
+      : [(options.scaledTo * absoluteWidth) / absoluteHeight, options.scaledTo];
+  const multiplier = width / absoluteWidth;
+  const cartesianPoints = points.map((point) => ({
+    x: getDistanceFromLine(point, ...yAxis, options.accuracy) * multiplier,
+    y: getDistanceFromLine(point, ...xAxis, options.accuracy) * multiplier,
+  }));
   return {
     points: cartesianPoints,
     width,
@@ -225,12 +189,23 @@ export function generateSvg(
     width,
     height,
   } = generateCartesianDetails(points, options);
-  return getSvg(
-    options.svg.width ?? width,
-    options.svg.height ?? height,
-    getSvgPath(cartesianPoints, options.smooth, options.smoothing),
-    (options as RequiredOptions).svg
-  );
+  return `<svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="${options.svg.width ?? width}"
+      height="${options.svg.height ?? height}"
+      viewBox="0 0 ${options.svg.width ?? width} ${
+    options.svg.height ?? height
+  }"
+    >
+      <path
+        d="${getSvgPath(cartesianPoints, options.smooth, options.smoothing)}"
+        fill="${options.svg.fill}"
+        stroke="${options.svg.stroke}"
+        stroke-width="${options.svg.strokeWidth}"
+        stroke-linecap="${options.svg.strokeLinecap}"
+        stroke-miterlimit="${options.svg.strokeMiterlimit}"
+      />
+    </svg>`.trim();
 }
 
 export function generateSvgPath(points: Coordinates[], options?: SvgOptions) {
