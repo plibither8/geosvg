@@ -32,7 +32,8 @@
     "build": "tsc && tsconfig-replace-paths --project tsconfig.json",
     "start": "node dist/index.js",
     "lint": "eslint --ext .ts src",
-    "lint:fix": "eslint --ext .ts src --fix"
+    "lint:fix": "eslint --ext .ts src --fix",
+    "version": "pnpm build"
   },
   "devDependencies": {
     "@types/node": "^17.0.8",
