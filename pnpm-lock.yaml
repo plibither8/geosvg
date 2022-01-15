@@ -10,7 +10,6 @@ specifiers:
   geolib: ^3.3.3
   nodemon: ^2.0.15
   prettier: ^2.5.1
-  svg-builder: ^1.0.0
   ts-node: ^10.4.0
   tsconfig-paths: ^3.12.0
   tsconfig-replace-paths: ^0.0.11
@@ -19,7 +18,6 @@ specifiers:
 
 dependencies:
   geolib: 3.3.3
-  svg-builder: 1.0.0
   xml-js: 1.6.11
 
 devDependencies:
@@ -1445,10 +1443,6 @@ packages:
     dependencies:
       has-flag: 4.0.0
     dev: true
-
-  /svg-builder/1.0.0:
-    resolution: {integrity: sha512-Alb20G9MRQLXnc8YhVfimUJdHqQB2KK1/J/0pAlAoRdtD+V8ryoZCNtkDBAGxQuNyd+lX9qb0RKpZ3kso45K+w==}
-    dev: false
 
   /to-readable-stream/1.0.0:
     resolution: {integrity: sha512-Iq25XBt6zD5npPhlLVXGFN3/gyR2/qODcKNNyTMd4vbm39HUaOiAM4PMq0eMVC/Tkxz+Zjdsc55g9yyz+Yq00Q==}

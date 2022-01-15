@@ -23,7 +23,6 @@
   },
   "dependencies": {
     "geolib": "^3.3.3",
-    "svg-builder": "^1.0.0",
     "xml-js": "^1.6.11"
   }
 }
