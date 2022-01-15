@@ -268,9 +268,7 @@ const inputs = {
   fromCoordinates,
 };
 
-const outputs = (
-  points: Coordinates[]
-): Record<string, (options: SvgOptions) => any> => ({
+const outputs = (points: Coordinates[]) => ({
   toSvg: (options?: SvgOptions) => generateSvg(points, getOptions(options)),
   toSvgPath: (options?: SvgOptions) =>
     generateSvgPath(points, getOptions(options)),
