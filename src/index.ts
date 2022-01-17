@@ -1,17 +1,6 @@
 import { getBounds, getDistance, getDistanceFromLine } from "geolib";
 import { xml2json } from "xml2json-light";
 
-interface XmlValue {
-  _text: string;
-}
-
-interface Bounds {
-  maxLat: number;
-  minLat: number;
-  maxLng: number;
-  minLng: number;
-}
-
 export interface Gpx {
   gpx: {
     trk: {
@@ -37,16 +26,21 @@ export interface Coordinates {
 
 type Line = [Coordinates, Coordinates];
 
+interface Bounds {
+  maxLat: number;
+  minLat: number;
+  maxLng: number;
+  minLng: number;
+}
+
 export interface CartesianOptions {
   accuracy?: number;
   scale?: number;
 }
 
-export interface SvgOptions {
+export interface SvgOptions extends CartesianOptions {
   smooth?: boolean;
   smoothing?: number;
-  accuracy?: number;
-  scale?: number;
   svg?: Partial<{
     width: number;
     height: number;
@@ -134,6 +128,13 @@ const getSvgPath = (
   );
 };
 
+/**
+ * Returns Cartesian details such as the height, width and list of the
+ * Cartesian points generated from the supplied list of coordinates
+ * @param points List of coordinates to generate it's Cartesian points' list
+ * @param options Options to tweek the result
+ * @returns Object with width and height of the Cartesian points' bounds, and the points
+ */
 export function generateCartesianDetails(
   points: Coordinates[],
   options?: CartesianOptions
@@ -165,10 +166,10 @@ export function generateCartesianDetails(
   options.scale ??= Math.max(absoluteWidth, absoluteHeight);
   const [width, height] =
     absoluteWidth > absoluteHeight
-      ? [options.scale, (options.scale * absoluteHeight) / absoluteWidth]
-      : [(options.scale * absoluteWidth) / absoluteHeight, options.scale];
+      ? [options.scale, options.scale * (absoluteHeight / absoluteWidth)]
+      : [options.scale * (absoluteWidth / absoluteHeight), options.scale];
   const multiplier = width / absoluteWidth;
-  const cartesianPoints = points.map((point) => ({
+  const cartesianPoints: CartesianPoint[] = points.map((point) => ({
     x: getDistanceFromLine(point, ...yAxis, options.accuracy) * multiplier,
     y: getDistanceFromLine(point, ...xAxis, options.accuracy) * multiplier,
   }));
@@ -179,6 +180,12 @@ export function generateCartesianDetails(
   };
 }
 
+/**
+ * Returns a stringified SVG with path generated from the list of coordinates
+ * @param points List of coordinates to generate it's Cartesian points' list
+ * @param options Options to tweek the result
+ * @returns An SVG string with the path
+ */
 export function generateSvg(
   points: Coordinates[],
   options?: SvgOptions
@@ -208,6 +215,13 @@ export function generateSvg(
     </svg>`.trim();
 }
 
+/**
+ * Returns the string that represents the shape of the path,
+ * along with its width and height
+ * @param points List of coordinates to generate it's Cartesian points' list
+ * @param options Options to tweek the result
+ * @returns Stringified path and height and width of the SVG
+ */
 export function generateSvgPath(points: Coordinates[], options?: SvgOptions) {
   options ??= defaultOptions;
   const {
@@ -222,6 +236,11 @@ export function generateSvgPath(points: Coordinates[], options?: SvgOptions) {
   };
 }
 
+/**
+ * Supply a GPX string to get a list of chainable functions for transformation
+ * @param gpx XML string of the GPX file
+ * @returns Chainable functions to transform the input
+ */
 export function fromGpx(gpx: string) {
   const parsedGpx = xml2json(gpx) as Gpx;
   const points: Coordinates[] = parsedGpx.gpx.trk.trkseg.trkpt.map(
@@ -233,6 +252,12 @@ export function fromGpx(gpx: string) {
   return outputs(points);
 }
 
+/**
+ * Supply a list of geographical coordinates to get
+ * a list of chainable functions for transformation
+ * @param points Array of geographical coordinates
+ * @returns Chainable functions to transform the input
+ */
 export function fromCoordinates(points: Coordinates[]) {
   return outputs(points);
 }
